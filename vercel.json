@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/rss-update",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }
