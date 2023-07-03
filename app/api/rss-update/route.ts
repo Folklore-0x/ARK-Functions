@@ -90,6 +90,8 @@ export async function GET(request: NextRequest) {
     return !existing.find((e) => e.guid === entry.guid)
   })
 
+  console.log(`About to update ${pending.length} entries`)
+
   // Add the pending entries to Mendable and the database.
   for (const entry of pending) {
     const taskId = await addToMendable(entry)
