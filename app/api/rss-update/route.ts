@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import Parser from "rss-parser"
+import { createClient } from "@supabase/supabase-js"
 
 const parser = new Parser()
-
-import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -39,7 +38,6 @@ async function fetchRssFeed() {
 async function getExistingEntries() {
   const { data: entries, error } = await supabase.from("entries").select("*")
 
-  // Throw any errors we receive.
   if (error) {
     throw error
   }
@@ -50,7 +48,16 @@ async function getExistingEntries() {
 async function addToDatabase(entry: Entry, taskId: string) {
   console.log(`Adding entry ${entry.guid} to database`)
 
-  await supabase.from("entries").insert({ ...entry, task_id: taskId })
+  const res = await supabase
+    .from("entries")
+    .insert({ ...entry, task_id: taskId })
+
+  if (res.error) {
+    console.log(res.error)
+    throw new Error(`Failed to add entry ${entry.guid} to database`)
+  }
+
+  console.log(`Added entry ${entry.guid} to database`)
 }
 
 async function addToMendable(entry: Entry) {
@@ -69,6 +76,9 @@ async function addToMendable(entry: Entry) {
   })
 
   if (!response.ok) {
+    console.log(response)
+    const body = await response.text()
+    console.log(body)
     throw new Error(`Failed to add entry ${entry.guid} to Mendable`)
   }
 
